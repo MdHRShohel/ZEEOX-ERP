@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { getNavItems, AuthRole } from "@/lib/auth";
+import { getNavItems, AuthRole } from "@/lib/auth-edge";
 import { cn } from "@/lib/utils";
 
 interface SidebarProps {

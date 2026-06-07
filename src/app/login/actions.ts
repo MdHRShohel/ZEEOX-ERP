@@ -19,7 +19,7 @@ export async function loginAction(formData: FormData) {
   const bootstrapUser = process.env.BOOTSTRAP_ADMIN_USER;
   const bootstrapPass = process.env.BOOTSTRAP_ADMIN_PASS;
   if (bootstrapUser && bootstrapPass && username === bootstrapUser && password === bootstrapPass) {
-    const token = createSessionToken({
+    const token = await createSessionToken({
       id: "bootstrap",
       username: bootstrapUser,
       displayName: "Admin (Bootstrap)",
@@ -40,7 +40,7 @@ export async function loginAction(formData: FormData) {
     return { error: "Invalid credentials" };
   }
 
-  const token = createSessionToken({
+  const token = await createSessionToken({
     id: user.id,
     username: user.username,
     displayName: user.displayName,

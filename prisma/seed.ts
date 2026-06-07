@@ -8,7 +8,7 @@ const scryptAsync = promisify(scrypt);
 async function hashPassword(plain: string): Promise<string> {
   const salt = randomBytes(16).toString("hex");
   const buf = (await scryptAsync(plain, salt, 64)) as Buffer;
-  return `${buf.toString("hex")}.${salt}`;
+  return `${salt}:${buf.toString("hex")}`;
 }
 
 async function main() {
@@ -91,19 +91,19 @@ async function main() {
 
   await prisma.user.upsert({
     where: { username: "admin" },
-    update: {},
+    update: { passwordHash: adminHash },
     create: { username: "admin", displayName: "Administrator", passwordHash: adminHash, role: "admin" },
   });
 
   await prisma.user.upsert({
     where: { username: "staff" },
-    update: {},
+    update: { passwordHash: staffHash },
     create: { username: "staff", displayName: "Staff Member", passwordHash: staffHash, role: "staff" },
   });
 
   await prisma.user.upsert({
     where: { username: "viewer" },
-    update: {},
+    update: { passwordHash: staffHash },
     create: { username: "viewer", displayName: "Viewer Account", passwordHash: staffHash, role: "viewer" },
   });
   console.log("  ✔ Users seeded (admin/staff/viewer)");

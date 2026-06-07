@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifySessionToken, canAccessRoute, COOKIE_NAME, AuthRole } from "@/lib/auth";
+import { verifySessionToken, canAccessRoute, COOKIE_NAME } from "@/lib/auth-edge";
+import type { AuthRole } from "@prisma/client";
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (
@@ -22,7 +23,7 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  const session = verifySessionToken(token);
+  const session = await verifySessionToken(token);
   if (!session) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
