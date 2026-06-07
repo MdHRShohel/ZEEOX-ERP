@@ -1,7 +1,7 @@
 import { requireSession, getPermissions } from "@/lib/auth";
 import { redirect, notFound } from "next/navigation";
 import { getSalesOrderDetail } from "@/server/services/sales-service";
-import { getProductsDropdownList } from "@/server/services/product-service";
+import { getProductDropdownList } from "@/server/services/product-service";
 import PageHeader from "@/components/layout/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -29,7 +29,7 @@ export default async function SalesOrderDetailPage({ params }: { params: { id: s
 
   const [order, products] = await Promise.all([
     getSalesOrderDetail(params.id),
-    getProductsDropdownList(),
+    getProductDropdownList(),
   ]);
   if (!order) notFound();
 
@@ -95,7 +95,7 @@ export default async function SalesOrderDetailPage({ params }: { params: { id: s
             <Button variant="outline">Create Invoice</Button>
           </Link>
         )}
-        {isDraft && order._count?.invoices === 0 && (
+        {isDraft && order.invoices.length === 0 && (
           <form action={deleteSalesOrder}>
             <input type="hidden" name="id" value={order.id} />
             <Button type="submit" variant="ghost" className="text-red-400">Delete</Button>
