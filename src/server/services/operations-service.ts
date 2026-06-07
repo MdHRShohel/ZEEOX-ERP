@@ -62,6 +62,45 @@ export async function getProductionOverview(filters?: { search?: string; from?: 
   };
 }
 
+export async function getExpenseOverview(filters?: { search?: string; category?: string; from?: Date; to?: Date }) {
+  if (!hasOperationsDatabase()) {
+    return { expenses: [], expenseCount: 0, totalAmount: 0 };
+  }
+
+  const search = filters?.search?.trim();
+  const expenseDate = filters?.from || filters?.to ? { ...(filters.from ? { gte: filters.from } : {}), ...(filters.to ? { lte: filters.to } : {}) } : undefined;
+  const where: Prisma.OfficeExpenseWhereInput | undefined = {
+    ...(filters?.category ? { category: { contains: filters.category.trim(), mode: "insensitive" } } : {}),
+    ...(expenseDate ? { expenseDate } : {}),
+    ...(search
+      ? {
+          OR: [
+            { category: { contains: search, mode: "insensitive" } },
+            { description: { contains: search, mode: "insensitive" } }
+          ]
+        }
+      : {})
+  };
+
+  const [expenses, summary] = await Promise.all([
+    prisma.officeExpense.findMany({
+      orderBy: { createdAt: "desc" },
+      where
+    }),
+    prisma.officeExpense.aggregate({
+      _sum: {
+        amount: true
+      }
+    })
+  ]);
+
+  return {
+    expenses,
+    expenseCount: expenses.length,
+    totalAmount: Number(summary._sum.amount ?? 0)
+  };
+}
+
 export async function getSalesOverview(filters?: { search?: string; status?: string; from?: Date; to?: Date }) {
   if (!hasOperationsDatabase()) {
     return { invoices: [], invoiceCount: 0, totalSale: 0, totalCost: 0, netProfit: 0 };

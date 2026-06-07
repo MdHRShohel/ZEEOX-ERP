@@ -1,0 +1,43 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: zeeox-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: zeeox
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d zeeox"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build:
+      context: .
+    container_name: zeeox-app
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/zeeox
+      DIRECT_URL: postgresql://postgres:postgres@postgres:5432/zeeox
+      AUTH_ADMIN_USERNAME: admin
+      AUTH_ADMIN_PASSWORD: admin1234
+      AUTH_STAFF_USERNAME: staff
+      AUTH_STAFF_PASSWORD: staff1234
+      AUTH_VIEWER_USERNAME: viewer
+      AUTH_VIEWER_PASSWORD: viewer1234
+      AUTH_SECRET: change-me
+    ports:
+      - "3000:3000"
+    command: sh -c "npx prisma migrate deploy && npm run start"
+
+volumes:
+  postgres_data:
