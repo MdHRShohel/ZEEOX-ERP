@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-type Product = { id: string; sku: string; name: string; costPrice?: number; salePrice?: number };
+type Product = { id: string; sku: string; name: string };
 
 interface Props {
   invoiceId: string;
